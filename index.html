@@ -487,7 +487,10 @@
         <div class="dashboard-container">
             <div class="dashboard-header">
                 <h2>Your Analytics</h2>
-                <button class="logout-btn" onclick="backToDashboard()" style="background: #667eea;">Back to Dashboard</button>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <button class="logout-btn" onclick="shareWithDoctor()" style="background: #3b82f6;">Share with Doctor</button>
+                    <button class="logout-btn" onclick="backToDashboard()" style="background: #667eea;">Back to Dashboard</button>
+                </div>
             </div>
 
             <div class="analytics-grid" style="display: grid; gap: 20px; margin-top: 20px;">
@@ -683,6 +686,10 @@
         function backToDashboard() {
             document.getElementById('analyticsView').classList.add('hidden');
             document.getElementById('dashboardView').classList.remove('hidden');
+        }
+
+        function shareWithDoctor() {
+            alert("Share with Doctor feature - Analytics prepared for sharing");
         }
 
         function updateAnalytics() {
