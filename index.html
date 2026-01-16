@@ -411,6 +411,8 @@
 
         // Triggered after clicking "Finish Entry"
         function submitJournal() {
+             
+            
             const journalInput = document.getElementById('journalText');
             const note = journalInput.value.trim();
 
@@ -425,9 +427,12 @@
 
             localStorage.setItem('mood', val);
             window.location.href='https://codemblem7.github.io/DepressionDecrease/Dashboard';
+            window.location.assign("google.com")
+           
         }
     </script>
 </body>
 </html>
+
 
 
