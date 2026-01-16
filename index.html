@@ -248,7 +248,6 @@
 </head>
 <body>
 
-    <!-- VIEW 1: LOGIN CONTAINER -->
     <div class="container" id="authContainer">
         <div class="header">
             <h1>Welcome to Depression Decrease</h1>
@@ -280,7 +279,6 @@
         </div>
     </div>
 
-    <!-- VIEW 2: DASHBOARD CONTAINER (Hidden by default) -->
     <div class="dashboard hidden" id="dashboardView">
         <div class="dashboard-container">
             <div class="dashboard-header">
@@ -298,13 +296,12 @@
                 <p style="color:#666;">Track your mood to see your progress over time.</p>
             </div>
 
-            <!-- MOOD TRACKER WIDGET -->
             <div class="mood-tracker-card">
                 <p style="color: #666; margin-bottom: 1rem;">How severe is your depression today?</p>
                 
                 <div class="scale-display">
                     <div class="value-number" id="scaleValue">1</div>
-                    <div class="value-label" id="scaleLabel">Non-Existent 😀</div>
+                    <div class="value-label" id="scaleLabel">Great 😀</div>
                 </div>
 
                 <div class="slider-container">
@@ -321,6 +318,23 @@
         </div>
     </div>
 
+    <div class="dashboard hidden" id="journalView">
+        <div class="dashboard-container">
+            <div class="welcome-card" style="margin-bottom: 2rem; text-align: center;">
+                <h3 style="font-size: 1.5rem; color:#333; margin-bottom:0.5rem;">Add context to your day?</h3>
+                <p style="color:#666;">(Optional) Writing down your thoughts can help you track patterns.</p>
+            </div>
+            
+            <div class="form-group">
+                <textarea id="journalText" 
+                    placeholder="What's contributing to your mood today?" 
+                    style="width: 100%; height: 150px; padding: 15px; border-radius: 12px; border: 1px solid #ddd; font-family: inherit; resize: none;"></textarea>
+            </div>
+
+            <button class="log-btn" onclick="submitJournal()" style="margin: 0 auto; display: block;">Finish Entry</button>
+        </div>
+    </div>
+
     <script>
         // --- STATE VARIABLES ---
         let userStreak = 0;
@@ -328,14 +342,9 @@
 
         // --- LOGIN LOGIC ---
         function handleLogin() {
-            // 1. Get User Name
             const nameInput = document.getElementById('loginName').value;
             const displayName = nameInput.trim() ? nameInput : "User";
-            
-            // 2. Update Welcome Message
             document.getElementById('welcomeMessage').textContent = `Hello, ${displayName}`;
-
-            // 3. Switch Views
             document.getElementById('authContainer').classList.add('hidden');
             const dashboard = document.getElementById('dashboardView');
             dashboard.classList.remove('hidden');
@@ -343,11 +352,10 @@
         }
 
         function handleLogout() {
-            // Reset View
             document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('journalView').classList.add('hidden');
             document.getElementById('authContainer').classList.remove('hidden');
             document.body.classList.remove('dashboard-active');
-            // Optional: Reset form
             document.getElementById('loginName').value = '';
         }
 
@@ -357,28 +365,24 @@
         const labelDisplay = document.getElementById('scaleLabel');
         const streakDisplay = document.getElementById('streakCounter');
 
-        // Emoji Labels mapping
         const labels = {
-            low: ["Non-Existent 😀", "Mild 🙂", "Okay 😐"],
+            low: ["Non-existant 😀", "Mild 🙂", "Okay 😐"],
             mid: ["Noticeable 🙁", "Moderate 😞", "Difficult 😩"],
             high: ["Severe 😫", "Heavy 😭", "Extreme 😱"]
         };
 
         function updateMoodUI(val) {
             valueDisplay.textContent = val;
-            
-            // Update Text Label & Emoji
             let labelText = "";
             if (val <= 3) labelText = labels.low[val-1];
             else if (val <= 6) labelText = labels.mid[val-4];
             else labelText = val == 10 ? "Crisis Alert 🆘" : labels.high[val-7];
             labelDisplay.textContent = labelText;
 
-            // Update Colors (Blue -> Purple -> Dark Slate)
             let color;
-            if (val <= 4) color = "#667eea"; // Calm Blue
-            else if (val <= 7) color = "#764ba2"; // Deep Purple
-            else color = "#4a5568"; // Heavy Grey/Slate
+            if (val <= 4) color = "#667eea";
+            else if (val <= 7) color = "#764ba2";
+            else color = "#4a5568";
             
             valueDisplay.style.color = color;
             labelDisplay.style.color = color;
@@ -387,30 +391,38 @@
 
         slider.addEventListener('input', (e) => updateMoodUI(e.target.value));
 
+        // Triggered after clicking "Log Today's Entry"
         function saveEntry() {
             const val = slider.value;
-            const today = new Date().toDateString(); // e.g. "Fri Jan 16 2026"
+            const today = new Date().toDateString();
 
-            // --- DAILY LIMIT CHECK ---
             if (lastLogDate === today) {
-                // User already logged today. Update value but do NOT increment streak.
-                alert(`Entry updated to ${val}, but you have already logged for today! \n\nCome back tomorrow to increase your streak.`);
-                return;
+                alert(`Entry updated to ${val}, but you have already logged for today!`);
+            } else {
+                userStreak++;
+                lastLogDate = today;
+                streakDisplay.textContent = `Day ${userStreak}`;
             }
 
-            // --- NEW DAILY ENTRY ---
-            userStreak++;
-            lastLogDate = today;
-            streakDisplay.textContent = `Day ${userStreak}`;
+            // Move to Journal View
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('journalView').classList.remove('hidden');
+        }
 
-            // Visual Feedback
-            alert(`Entry Saved! \nSeverity: ${val}\nStreak updated to Day ${userStreak} 🔥`);
+        // Triggered after clicking "Finish Entry"
+        function submitJournal() {
+            const journalInput = document.getElementById('journalText');
+            const note = journalInput.value.trim();
+
+            if (note !== "") {
+                alert("Entry Saved! \nYour thoughts have been logged for today.");
+            }
+
+            // Clear text and return to scale page
+            journalInput.value = "";
+            document.getElementById('journalView').classList.add('hidden');
+            document.getElementById('dashboardView').classList.remove('hidden');
         }
     </script>
 </body>
 </html>
-
-
-
-
-
