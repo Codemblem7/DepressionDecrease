@@ -244,6 +244,150 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             max-width: 300px;
         }
+
+        /* --- Crisis Popup Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            color: #dc2626;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .helpline-card {
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .helpline-card h3 {
+            color: #991b1b;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .helpline-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #dc2626;
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+
+        .helpline-info {
+            color: #7f1d1d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .resources-list {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .resources-list h3 {
+            color: #166534;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .resources-list ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .resources-list li {
+            color: #15803d;
+            padding: 8px 0;
+            border-bottom: 1px solid #dcfce7;
+        }
+
+        .resources-list li:last-child {
+            border-bottom: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .modal-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .modal-btn-primary {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: #f3f4f6;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -377,6 +521,40 @@
         </div>
     </div>
 
+    <!-- Crisis Support Modal -->
+    <div id="crisisModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🆘 We're Here to Help</h2>
+                <p>You don't have to face this alone. Help is available 24/7.</p>
+            </div>
+
+            <div class="helpline-card">
+                <h3>📞 988 Suicide & Crisis Lifeline</h3>
+                <div class="helpline-number">988</div>
+                <div class="helpline-info">
+                    Available 24/7 for free and confidential support.<br>
+                    Call or text 988, or chat at 988lifeline.org
+                </div>
+            </div>
+
+            <div class="resources-list">
+                <h3>Additional Resources:</h3>
+                <ul>
+                    <li><strong>Crisis Text Line:</strong> Text HOME to 741741</li>
+                    <li><strong>Veterans Crisis Line:</strong> Press 1 after calling 988</li>
+                    <li><strong>SAMHSA Helpline:</strong> 1-800-662-4357</li>
+                    <li><strong>Trevor Project (LGBTQ+):</strong> 1-866-488-7386</li>
+                </ul>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="window.open('tel:988', '_self')">Call 988 Now</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeCrisisModal()">Continue Logging</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- STATE VARIABLES ---
         let userStreak = 0;
@@ -401,6 +579,15 @@
             document.getElementById('authContainer').classList.remove('hidden');
             document.body.classList.remove('dashboard-active');
             document.getElementById('loginName').value = '';
+        }
+
+        // --- CRISIS MODAL FUNCTIONS ---
+        function showCrisisModal() {
+            document.getElementById('crisisModal').classList.remove('hidden');
+        }
+
+        function closeCrisisModal() {
+            document.getElementById('crisisModal').classList.add('hidden');
         }
 
         // --- MOOD TRACKER LOGIC ---
@@ -437,8 +624,14 @@
 
         // Triggered after clicking "Log Today's Entry"
         function saveEntry() {
-            const val = slider.value;
+            const val = parseInt(slider.value);
             const today = new Date().toDateString();
+
+            // Show crisis modal if severity is 9 or 10
+            if (val >= 9) {
+                showCrisisModal();
+                return;
+            }
 
             if (lastLogDate === today) {
                 alert(`Entry updated to ${val}, but you have already logged for today!`);
