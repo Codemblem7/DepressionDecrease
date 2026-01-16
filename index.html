@@ -315,6 +315,10 @@
 
                 <button class="log-btn" onclick="saveEntry()">Log Today's Entry</button>
             </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="log-btn" onclick="showAnalytics()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">View Analytics</button>
+            </div>
         </div>
     </div>
 
@@ -335,10 +339,49 @@
         </div>
     </div>
 
+    <div class="dashboard hidden" id="analyticsView">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>Your Analytics</h2>
+                <button class="logout-btn" onclick="backToDashboard()" style="background: #667eea;">Back to Dashboard</button>
+            </div>
+
+            <div class="analytics-grid" style="display: grid; gap: 20px; margin-top: 20px;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white;">
+                    <h3 style="font-size: 1rem; opacity: 0.9; margin-bottom: 10px;">Total Entries</h3>
+                    <p style="font-size: 2.5rem; font-weight: 800;" id="totalEntries">0</p>
+                </div>
+
+                <div class="stat-card" style="background: #f0fdf4; border: 2px solid #86efac; padding: 25px; border-radius: 15px;">
+                    <h3 style="font-size: 1rem; color: #166534; margin-bottom: 10px;">Average Mood Level</h3>
+                    <p style="font-size: 2.5rem; font-weight: 800; color: #16a34a;" id="averageMood">N/A</p>
+                </div>
+
+                <div class="stat-card" style="background: #fef3c7; border: 2px solid #fbbf24; padding: 25px; border-radius: 15px;">
+                    <h3 style="font-size: 1rem; color: #92400e; margin-bottom: 10px;">Best Day (Lowest)</h3>
+                    <p style="font-size: 1.5rem; font-weight: 700; color: #d97706;" id="bestDay">No data yet</p>
+                </div>
+
+                <div class="stat-card" style="background: #fce7f3; border: 2px solid #f9a8d4; padding: 25px; border-radius: 15px;">
+                    <h3 style="font-size: 1rem; color: #831843; margin-bottom: 10px;">Current Streak</h3>
+                    <p style="font-size: 2.5rem; font-weight: 700; color: #be185d;" id="analyticsStreak">0 days</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 15px;">
+                <h3 style="color: #333; margin-bottom: 15px;">Recent Entries</h3>
+                <div id="recentEntries" style="color: #666;">
+                    <p>No entries logged yet. Start tracking your mood to see analytics!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- STATE VARIABLES ---
         let userStreak = 0;
         let lastLogDate = null;
+        let moodEntries = [];
 
         // --- LOGIN LOGIC ---
         function handleLogin() {
@@ -354,6 +397,7 @@
         function handleLogout() {
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('journalView').classList.add('hidden');
+            document.getElementById('analyticsView').classList.add('hidden');
             document.getElementById('authContainer').classList.remove('hidden');
             document.body.classList.remove('dashboard-active');
             document.getElementById('loginName').value = '';
@@ -411,10 +455,18 @@
 
         // Triggered after clicking "Finish Entry"
         function submitJournal() {
-             
-            
             const journalInput = document.getElementById('journalText');
             const note = journalInput.value.trim();
+            const val = slider.value;
+            const today = new Date();
+
+            // Save entry to array
+            moodEntries.push({
+                date: today.toDateString(),
+                mood: parseInt(val),
+                note: note,
+                timestamp: today
+            });
 
             if (note !== "") {
                 alert("Entry Saved! \nYour thoughts have been logged for today.");
@@ -426,12 +478,60 @@
             document.getElementById('dashboardView').classList.remove('hidden');
 
             localStorage.setItem('mood', val);
-            window.location.href='https://codemblem7.github.io/DepressionDecrease/Dashboard';
-            window.location.assign("google.com")
-           
+        }
+
+        // --- ANALYTICS FUNCTIONS ---
+        function showAnalytics() {
+            updateAnalytics();
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('analyticsView').classList.remove('hidden');
+        }
+
+        function backToDashboard() {
+            document.getElementById('analyticsView').classList.add('hidden');
+            document.getElementById('dashboardView').classList.remove('hidden');
+        }
+
+        function updateAnalytics() {
+            // Total Entries
+            document.getElementById('totalEntries').textContent = moodEntries.length;
+
+            // Average Mood
+            if (moodEntries.length > 0) {
+                const avg = moodEntries.reduce((sum, e) => sum + e.mood, 0) / moodEntries.length;
+                document.getElementById('averageMood').textContent = avg.toFixed(1);
+            } else {
+                document.getElementById('averageMood').textContent = 'N/A';
+            }
+
+            // Best Day (Lowest Mood Value)
+            if (moodEntries.length > 0) {
+                const best = moodEntries.reduce((min, e) => e.mood < min.mood ? e : min);
+                document.getElementById('bestDay').textContent = `${best.mood} on ${best.date}`;
+            } else {
+                document.getElementById('bestDay').textContent = 'No data yet';
+            }
+
+            // Current Streak
+            document.getElementById('analyticsStreak').textContent = `${userStreak} days`;
+
+            // Recent Entries
+            const recentDiv = document.getElementById('recentEntries');
+            if (moodEntries.length > 0) {
+                const recent = moodEntries.slice(-5).reverse();
+                recentDiv.innerHTML = recent.map(e => `
+                    <div style="padding: 15px; background: white; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <strong style="color: #333;">${e.date}</strong>
+                            <span style="color: #667eea; font-weight: 700;">Mood: ${e.mood}/10</span>
+                        </div>
+                        ${e.note ? `<p style="color: #666; font-size: 0.9rem; margin-top: 8px;">${e.note}</p>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                recentDiv.innerHTML = '<p>No entries logged yet. Start tracking your mood to see analytics!</p>';
+            }
         }
     </script>
 </body>
 </html>
-
-
