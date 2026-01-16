@@ -415,13 +415,9 @@
             
             const journalInput = document.getElementById('journalText');
             const note = journalInput.value.trim();
-             window.location.href = 'https://codemblem7.github.io/DepressionDecrease/';
 
             if (note !== "") {
                 alert("Entry Saved! \nYour thoughts have been logged for today.");
-                localStorage.setItem('mood', ${val});
-                
-                
             }
 
             // Clear text and return to scale page
@@ -429,15 +425,13 @@
             document.getElementById('journalView').classList.add('hidden');
             document.getElementById('dashboardView').classList.remove('hidden');
 
-            
+            localStorage.setItem('mood', val);
+            window.location.href='https://codemblem7.github.io/DepressionDecrease/Dashboard';
+            window.location.assign("google.com")
            
         }
     </script>
 </body>
 </html>
-
-
-
-
 
 
